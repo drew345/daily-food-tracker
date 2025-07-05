@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Extra Points Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div class="total-section">
+            <h2>Current Daily Total: <span id="dailyTotal">0</span> points</h2>
+            <button id="resetTotalBtn">Reset for New Day</button>
+        </div>
+
+        <hr>
+
+        <div class="input-section">
+            <label for="foodName">Food Item:</label>
+            <div class="food-input-container">
+                <input type="text" id="foodName" placeholder="e.g., Cookie, Extra Coffee">
+                <div id="autocompleteSuggestions" class="autocomplete-suggestions"></div>
+            </div>
+            <label for="points">Points:</label>
+            <input type="number" id="points" min="0" value="1">
+
+            <button id="addFoodBtn">Add to Total</button>
+        </div>
+
+        <h3>Today's Log:</h3>
+        <ul id="foodLog"></ul>
+        
+        <h1>Daily Extra Points Tracker</h1>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
