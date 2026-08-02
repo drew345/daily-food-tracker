@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const LOCAL_STORAGE_KEY_ITEMS = 'extraFoodTracker.rememberedItems';
     const LOCAL_STORAGE_KEY_TOTAL = 'extraFoodTracker.dailyTotal';
     const LOCAL_STORAGE_KEY_LOG = 'extraFoodTracker.currentDayLog';
+    const LOCAL_STORAGE_KEY_LAST_OPENED_DATE = 'extraFoodTracker.lastOpenedDate';
 
     function saveItems() {
         localStorage.setItem(LOCAL_STORAGE_KEY_ITEMS, JSON.stringify(rememberedFoodItems));
@@ -30,24 +31,64 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(LOCAL_STORAGE_KEY_TOTAL, dailyTotalPoints.toString());
     }
 
-    function loadDailyTotal() {
-        const storedTotal = localStorage.getItem(LOCAL_STORAGE_KEY_TOTAL);
-        if (storedTotal) {
-            dailyTotalPoints = parseInt(storedTotal, 10);
-        }
-        updateDailyTotalDisplay();
-    }
-
     function saveCurrentDayLog() {
         localStorage.setItem(LOCAL_STORAGE_KEY_LOG, JSON.stringify(currentDayLog));
     }
 
-    function loadCurrentDayLog() {
+    function getLocalDateKey(date = new Date()) {
+        const today = date;
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function resetDailyData() {
+        dailyTotalPoints = 0;
+        currentDayLog = [];
+        saveDailyTotal();
+        saveCurrentDayLog();
+        updateDailyTotalDisplay();
+        updateFoodLogDisplay();
+    }
+
+    function loadDailyData() {
+        const storedTotal = localStorage.getItem(LOCAL_STORAGE_KEY_TOTAL);
+        if (storedTotal !== null) {
+            const parsedTotal = parseInt(storedTotal, 10);
+            if (!isNaN(parsedTotal)) {
+                dailyTotalPoints = parsedTotal;
+            }
+        }
+
         const storedLog = localStorage.getItem(LOCAL_STORAGE_KEY_LOG);
         if (storedLog) {
             currentDayLog = JSON.parse(storedLog);
         }
-        updateFoodLogDisplay();
+
+        const today = getLocalDateKey();
+        let lastOpenedDate = localStorage.getItem(LOCAL_STORAGE_KEY_LAST_OPENED_DATE);
+
+        // Use the existing log timestamp to migrate data saved before the
+        // last-opened date was introduced.
+        if (!lastOpenedDate && currentDayLog.length > 0) {
+            const lastLogEntry = currentDayLog[currentDayLog.length - 1];
+            if (lastLogEntry.timestamp) {
+                const lastLogDate = new Date(lastLogEntry.timestamp);
+                if (!isNaN(lastLogDate.getTime())) {
+                    lastOpenedDate = getLocalDateKey(lastLogDate);
+                }
+            }
+        }
+
+        if (lastOpenedDate && lastOpenedDate !== today) {
+            resetDailyData();
+        } else {
+            updateDailyTotalDisplay();
+            updateFoodLogDisplay();
+        }
+
+        localStorage.setItem(LOCAL_STORAGE_KEY_LAST_OPENED_DATE, today);
     }
 
     // Function to render custom autocomplete suggestions
@@ -70,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="suggestion-name">${item.name}</span>
                 <span class="suggestion-points">(${item.points} pts)</span>
             `;
-            
+
             suggestionItem.addEventListener('click', () => {
                 foodNameInput.value = item.name;
                 pointsInput.value = item.points;
@@ -104,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFoodLogDisplay();
 
         const existingIndex = rememberedFoodItems.findIndex(item => item.name.toLowerCase() === name.toLowerCase());
-        
+
         let itemToMoveOrAdd = { name: name, points: points };
 
         if (existingIndex !== -1) {
@@ -113,10 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemToMoveOrAdd.points = points;
             }
         }
-        
+
         rememberedFoodItems.push(itemToMoveOrAdd);
         saveItems();
-        
+
         foodNameInput.value = '';
         pointsInput.value = '1';
         autocompleteSuggestionsDiv.style.display = 'none';
@@ -138,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener for typing/pasting into the input field
     foodNameInput.addEventListener('input', () => {
         const currentInputValue = foodNameInput.value.trim().toLowerCase();
-        
+
         // Always filter by input value if something is typed
         const filteredSuggestions = rememberedFoodItems
             .slice().reverse() // Reverse to show most recent first
@@ -171,24 +212,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // A small delay allows click events on suggestions to fire before the div hides
         setTimeout(() => {
             autocompleteSuggestionsDiv.style.display = 'none';
-        }, 150); 
+        }, 150);
     });
 
 
     resetTotalBtn.addEventListener('click', () => {
         if (confirm('Are you sure you want to reset the daily total and log? This cannot be undone.')) {
-            dailyTotalPoints = 0;
-            currentDayLog = [];
-            saveDailyTotal();
-            saveCurrentDayLog();
-            updateDailyTotalDisplay();
-            updateFoodLogDisplay();
+            resetDailyData();
         }
     });
 
     // --- Initialization ---
     loadItems();
-    loadDailyTotal();
-    loadCurrentDayLog();
+    loadDailyData();
     // No initial rendering of suggestions here, as they appear on focus/input
 });

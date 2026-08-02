@@ -101,11 +101,15 @@ button:hover {
 
 #resetTotalBtn {
     background-color: #dc3545;
-    margin-top: 8px;
 }
 
 #resetTotalBtn:hover {
     background-color: #c82333;
+}
+
+.reset-section {
+    padding-top: 5px;
+    text-align: center;
 }
 
 hr {
