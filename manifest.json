@@ -1,0 +1,25 @@
+{
+    "name": "Daily Extra Points",
+    "short_name": "Extra Points",
+    "description": "A simple food log for tracking off-plan food points.",
+    "id": "./",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "background_color": "#f4f4f4",
+    "theme_color": "#dc3545",
+    "icons": [
+        {
+            "src": "icons/daily-extra-points-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icons/daily-extra-points-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
