@@ -7,7 +7,7 @@
     "scope": "./",
     "display": "standalone",
     "background_color": "#f4f4f4",
-    "theme_color": "#dc3545",
+    "theme_color": "#a9ded6",
     "icons": [
         {
             "src": "icons/daily-extra-points-192.png",
